@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KonserKu - Pesan Tiket Konser</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --dark-color: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+
+        .hero-section {
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .badge-category {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(108, 92, 231, 0.9);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #5f4dd1;
+            transform: scale(1.05);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+        }
+
+        .ticket-type {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ticket-type:hover {
+            border-color: var(--primary-color);
+            background: #f8f9ff;
+        }
+
+        .ticket-type.selected {
+            border-color: var(--primary-color);
+            background: #f0edff;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .login-form, .register-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+
+        #admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .concert-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-music"></i> KonserKu</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showHome()">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showKonser()">Konser</a>
+                    </li>
+                    <li class="nav-item" id="nav-admin" style="display:none;">
+                        <a class="nav-link" href="#" onclick="showAdmin()">Admin Panel</a>
+                    </li>
+                    <li class="nav-item" id="nav-login">
+                        <a class="nav-link" href="#" onclick="showLogin()"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    </li>
+                    <li class="nav-item" id="nav-logout" style="display:none;">
+                        <a class="nav-link" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section" id="home-section">
+            <div class="container">
+                <h1><i class="fas fa-ticket-alt"></i> Selamat Datang di KonserKu</h1>
+                <p class="lead">Platform pemesanan tiket konser terbaik di Indonesia</p>
+                <button class="btn btn-primary btn-lg mt-3" onclick="showKonser()">Lihat Konser <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </section>
+
+        <!-- Konser Section -->
+        <section class="container" id="konser-section" style="display:none;">
+            <div class="text-center mb-5">
+                <h2 class="text-white fw-bold">Konser Mendatang</h2>
+                <p class="text-white">Pilih konser favoritmu dan pesan tiketnya sekarang!</p>
+            </div>
+            <div class="row" id="konser-list">
+                <!-- Konser cards will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <!-- Login Form -->
+        <div class="container" id="login-section" style="display:none;">
+            <div class="login-form">
+                <h3 class="text-center mb-4">Login</h3>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="login-username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <p class="text-center mt-3">Belum punya akun? <a href="#" onclick="showRegister()">Daftar disini</a></p>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div class="container" id="register-section" style="display:none;">
+            <div class="register-form">
+                <h3 class="text-center mb-4">Daftar Akun</h3>
+                <form id="register-form">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="reg-username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="reg-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="reg-nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="reg-email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">No. HP</label>
+                        <input type="tel" class="form-control" id="reg-hp" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Daftar</button>
+                </form>
+                <p class="text-center mt-3">Sudah punya akun? <a href="#" onclick="showLogin()">Login disini</a></p>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="container" id="admin-section" style="display:none;">
+            <div id="admin-panel">
+                <h2 class="mb-4"><i class="fas fa-cog"></i> Admin Panel</h2>
+                
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#tab-konser">Kelola Konser</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#tab-transaksi">Transaksi</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Kelola Konser Tab -->
+                    <div id="tab-konser" class="tab-pane fade show active">
+                        <button class="btn btn-primary mb-3" onclick="showAddKonserModal()">
+                            <i class="fas fa-plus"></i> Tambah Konser
+                        </button>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nama Konser</th>
+                                        <th>Tanggal</th>
+                                        <th>Tempat</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-konser-list">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Transaksi Tab -->
+                    <div id="tab-transaksi" class="tab-pane fade">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Pembeli</th>
+                                        <th>Tanggal</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-transaksi-list">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pemesanan -->
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalTitle">Pesan Tiket</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="ticket-types">
+                        <!-- Ticket types will be loaded here -->
+                    </div>
+                    <div class="mt-4">
+                        <h6>Total Pembayaran: <span class="text-primary fw-bold" id="total-price">Rp 0</span></h6>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="processBooking()">Konfirmasi Pemesanan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add Konser -->
+    <div class="modal fade" id="addKonserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Konser Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-konser-form">
+                        <div class="mb-3">
+                            <label class="form-label">Nama Konser</label>
+                            <input type="text" class="form-control" id="konser-nama" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="konser-tanggal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tempat</label>
+                            <input type="text" class="form-control" id="konser-tempat" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-control" id="konser-deskripsi" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="addKonser()">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 KonserKu. All rights reserved.</p>
+            <p class="mb-0"><i class="fas fa-music"></i> Sistem Informasi Pemesanan Tiket Konser</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // State Management
+        let currentUser = null;
+        let concerts = [];
+        let selectedConcert = null;
+        let selectedTickets = {};
+
+        // Initialize demo data
+        function initDemoData() {
+            concerts = [
+                {
+                    id_konser: 1,
+                    nama_konser: "Rock Fest 2024",
+                    tanggal: "2024-12-31",
+                    tempat: "Gelora Bung Karno, Jakarta",
+                    deskripsi: "Festival musik rock terbesar tahun ini!",
+                    image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500",
+                    tiket: [
+                        { id_jenis: 1, nama_jenis: "Regular", harga: 500000, kuota: 1000 },
+                        { id_jenis: 2, nama_jenis: "VIP", harga: 1500000, kuota: 200 },
+                        { id_jenis: 3, nama_jenis: "VVIP", harga: 3000000, kuota: 50 }
+                    ]
+                },
+                {
+                    id_konser: 2,
+                    nama_konser: "Jazz Night 2024",
+                    tanggal: "2025-01-15",
+                    tempat: "Balai Sarbini, Jakarta",
+                    deskripsi: "Malam jazz dengan musisi internasional",
+                    image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=500",
+                    tiket: [
+                        { id_jenis: 4, nama_jenis: "Regular", harga: 750000, kuota: 500 },
+                        { id_jenis: 5, nama_jenis: "Premium", harga: 2000000, kuota: 100 }
+                    ]
+                },
+                {
+                    id_konser: 3,
+                    nama_konser: "EDM Festival 2024",
+                    tanggal: "2025-02-14",
+                    tempat: "Ancol Beach, Jakarta",
+                    deskripsi: "Festival musik elektronik terbesar",
+                    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500",
+                    tiket: [
+                        { id_jenis: 6, nama_jenis: "Early Bird", harga: 400000, kuota: 2000 },
+                        { id_jenis: 7, nama_jenis: "Regular", harga: 600000, kuota: 1500 },
+                        { id_jenis: 8, nama_jenis: "VIP", harga: 2500000, kuota: 300 }
+                    ]
+                }
+            ];
+        }
+
+        // Navigation Functions
+        function showHome() {
+            hideAllSections();
+            document.getElementById('home-section').style.display = 'block';
+        }
+
+        function showKonser() {
+            hideAllSections();
+            document.getElementById('konser-section').style.display = 'block';
+            loadKonserList();
+        }
+
+        function showLogin() {
+            hideAllSections();
+            document.getElementById('login-section').style.display = 'block';
+        }
+
+        function showRegister() {
+            hideAllSections();
+            document.getElementById('register-section').style.display = 'block';
+        }
+
+        function showAdmin() {
+            if (currentUser && currentUser.role === 'admin') {
+                hideAllSections();
+                document.getElementById('admin-section').style.display = 'block';
+                loadAdminData();
+            }
+        }
+
+        function hideAllSections() {
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('konser-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('register-section').style.display = 'none';
+            document.getElementById('admin-section').style.display = 'none';
+        }
+
+        // Load Konser List
+        function loadKonserList() {
+            const container = document.getElementById('konser-list');
+            container.innerHTML = '';
+
+            concerts.forEach(concert => {
+                const card = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="${concert.image}" class="card-img-top" alt="${concert.nama_konser}">
+                            <span class="badge badge-category">Konser</span>
+                            <div class="card-body">
+                                <h5 class="card-title">${concert.nama_konser}</h5>
+                                <p class="card-text">
+                                    <i class="fas fa-calendar"></i> ${formatDate(concert.tanggal)}<br>
+                                    <i class="fas fa-map-marker-alt"></i> ${concert.tempat}
+                                </p>
+                                <p class="card-text text-muted">${concert.deskripsi}</p>
+                                <button class="btn btn-primary w-100" onclick="openBooking(${concert.id_konser})">
+                                    <i class="fas fa-ticket-alt"></i> Pesan Tiket
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        // Open Booking Modal
+        function openBooking(concertId) {
+            if (!currentUser) {
+                alert('Silakan login terlebih dahulu!');
+                showLogin();
+                return;
+            }
+
+            selectedConcert = concerts.find(c => c.id_konser === concertId);
+            selectedTickets = {};
+
+            document.getElementById('bookingModalTitle').textContent = `Pesan Tiket - ${selectedConcert.nama_konser}`;
+            
+            const container = document.getElementById('ticket-types');
+            container.innerHTML = '';
+
+            selectedConcert.tiket.forEach(tiket => {
+                const ticketCard = `
+                    <div class="ticket-type" data-id="${tiket.id_jenis}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">${tiket.nama_jenis}</h6>
+                                <p class="mb-0 text-muted">Rp ${formatCurrency(tiket.harga)}</p>
+                                <small class="text-muted">Kuota tersisa: ${tiket.kuota}</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="updateTicketQuantity(${tiket.id_jenis}, -1)">-</button>
+                                <input type="number" class="form-control form-control-sm mx-2" style="width: 60px;" 
+                                       id="qty-${tiket.id_jenis}" value="0" min="0" max="${tiket.kuota}" readonly>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="updateTicketQuantity(${tiket.id_jenis}, 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += ticketCard;
+            });
+
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+            updateTotalPrice();
+        }
+
+        // Update Ticket Quantity
+        function updateTicketQuantity(ticketId, change) {
+            const input = document.getElementById(`qty-${ticketId}`);
+            let newValue = parseInt(input.value) + change;
+            const max = parseInt(input.max);
+
+            if (newValue < 0) newValue = 0;
+            if (newValue > max) newValue = max;
+
+            input.value = newValue;
+
+            const tiket = selectedConcert.tiket.find(t => t.id_jenis === ticketId);
+            if (newValue > 0) {
+                selectedTickets[ticketId] = { tiket: tiket, jumlah: newValue };
+            } else {
+                delete selectedTickets[ticketId];
+            }
+
+            updateTotalPrice();
+        }
+
+        // Update Total Price
+        function updateTotalPrice() {
+            let total = 0;
+            Object.values(selectedTickets).forEach(item => {
+                total += item.tiket.harga * item.jumlah;
+            });
+            document.getElementById('total-price').textContent = `Rp ${formatCurrency(total)}`;
+        }
+
+        // Process Booking
+        function processBooking() {
+            if (Object.keys(selectedTickets).length === 0) {
+                alert('Pilih minimal 1 tiket!');
+                return;
+            }
+
+            // Simulate booking process
+            alert('Pemesanan berhasil! Total pembayaran: Rp ' + formatCurrency(calculateTotal()));
+            bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+            
+            // In real implementation, this would send data to backend
+            console.log('Booking data:', {
+                user: currentUser,
+                concert: selectedConcert,
+                tickets: selectedTickets
+            });
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            Object.values(selectedTickets).forEach(item => {
+                total += item.tiket.harga * item.jumlah;
+            });
+            return total;
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            // Demo login (in production, verify with backend)
+            if (username === 'admin' && password === 'admin') {
+                currentUser = { username: 'admin', role: 'admin' };
+                document.getElementById('nav-admin').style.display = 'block';
+            } else {
+                currentUser = { username: username, role: 'pembeli' };
+            }
+
+            document.getElementById('nav-login').style.display = 'none';
+            document.getElementById('nav-logout').style.display = 'block';
+            
+            alert('Login berhasil! Selamat datang, ' + username);
+            showHome();
+        });
+
+        // Register
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Pendaftaran berhasil! Silakan login.');
+            showLogin();
+        });
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('nav-login').style.display = 'block';
+            document.getElementById('nav-logout').style.display = 'none';
+            document.getElementById('nav-admin').style.display = 'none';
+            showHome();
+        }
+
+        // Admin Functions
+        function loadAdminData() {
+            // Load konser list
+            const konserList = document.getElementById('admin-konser-list');
+            konserList.innerHTML = '';
+            concerts.forEach(concert => {
+                konserList.innerHTML += `
+                    <tr>
+                        <td>${concert.id_konser}</td>
+                        <td>${concert.nama_konser}</td>
+                        <td>${formatDate(concert.tanggal)}</td>
+                        <td>${concert.tempat}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteKonser(${concert.id_konser})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Load transaksi (demo data)
+            const transaksiList = document.getElementById('admin-transaksi-list');
+            transaksiList.innerHTML = `
+                <tr>
+                    <td>1</td>
+                    <td>John Doe</td>
+                    <td>2024-12-20</td>
+                    <td>Rp 1.500.000</td>
+                    <td><span class="badge bg-success">Sukses</span></td>
+                </tr>
+            `;
+        }
+
+        function showAddKonserModal() {
+            new bootstrap.Modal(document.getElementById('addKonserModal')).show();
+        }
+
+        function addKonser() {
+            const newConcert = {
+                id_konser: concerts.length + 1,
+                nama_konser: document.getElementById('konser-nama').value,
+                tanggal: document.getElementById('konser-tanggal').value,
+                tempat: document.getElementById('konser-tempat').value,
+                deskripsi: document.getElementById('konser-deskripsi').value,
+                image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500",
+                tiket: []
+            };
+
+            concerts.push(newConcert);
+            bootstrap.Modal.getInstance(document.getElementById('addKonserModal')).hide();
+            loadAdminData();
+            alert('Konser berhasil ditambahkan!');
+        }
+
+        function deleteKonser(id) {
+            if (confirm('Yakin ingin menghapus konser ini?')) {
+                concerts = concerts.filter(c => c.id_konser !== id);
+                loadAdminData();
+            }
+        }
+
+        // Utility Functions
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        function formatCurrency(amount) {
+            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Initialize
+        initDemoData();
+        showHome();
+    </script>
+</body>
+</html>
